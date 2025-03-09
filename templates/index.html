@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>タスク管理アプリ</title>
+  <style>
+    /* バックログのタスク表示用のシンプルなスタイル */
+    .task {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin: 5px;
+      cursor: move;
+    }
+    .completed {
+      background-color: #d3ffd3;
+      text-decoration: line-through;
+    }
+    #task-list {
+      list-style-type: none;
+      padding: 0;
+    }
+    .over {
+      border: 2px dashed #000;
+    }
+  </style>
+</head>
+<body>
+  <h1>タスク管理アプリ</h1>
+
+  <!-- タスク追加用フォーム -->
+  <div>
+    <h2>タスクを追加</h2>
+    <form id="task-form">
+      <input type="text" id="title" placeholder="タスクタイトル" required><br>
+      <textarea id="details" placeholder="タスクの詳細"></textarea><br>
+      <input type="date" id="due_date"><br>
+      <input type="text" id="labels" placeholder="ラベル（カンマ区切り）"><br>
+      <button type="submit">タスクを追加</button>
+    </form>
+  </div>
+
+  <!-- バックログ形式のタスクリスト -->
+  <h2>バックログ</h2>
+  <ul id="task-list">
+    {% for task in tasks %}
+      <li class="task" draggable="true" data-id="{{ task.id }}">
+        <strong>{{ task.title }}</strong><br>
+        詳細: {{ task.details }}<br>
+        期限: {{ task.due_date }}<br>
+        ラベル: {{ task.labels|join(', ') }}<br>
+        状態: {{ '済み' if task.completed else '未完了' }}<br>
+        <button onclick="completeTask({{ task.id }})">完了にする</button>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <script>
+    let dragSrcEl = null;
+
+    // ドラッグ開始
+    function handleDragStart(e) {
+      dragSrcEl = this;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', this.outerHTML);
+      this.classList.add('dragElem');
+    }
+
+    // ドラッグオーバー時の処理
+    function handleDragOver(e) {
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+      e.dataTransfer.dropEffect = 'move';
+      return false;
+    }
+
+    function handleDragEnter(e) {
+      this.classList.add('over');
+    }
+
+    function handleDragLeave(e) {
+      this.classList.remove('over');
+    }
+
+    // ドロップ時の処理
+    function handleDrop(e) {
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+      if (dragSrcEl !== this) {
+        // ドラッグ元を削除し、ドロップ先の前に挿入
+        dragSrcEl.parentNode.removeChild(dragSrcEl);
+        let dropHTML = e.dataTransfer.getData('text/html');
+        this.insertAdjacentHTML('beforebegin', dropHTML);
+        let dropElem = this.previousSibling;
+        addDnDHandlers(dropElem);
+        updateOrder();
+      }
+      this.classList.remove('over');
+      return false;
+    }
+
+    function handleDragEnd(e) {
+      this.classList.remove('over');
+    }
+
+    function addDnDHandlers(elem) {
+      elem.addEventListener('dragstart', handleDragStart, false);
+      elem.addEventListener('dragenter', handleDragEnter, false);
+      elem.addEventListener('dragover', handleDragOver, false);
+      elem.addEventListener('dragleave', handleDragLeave, false);
+      elem.addEventListener('drop', handleDrop, false);
+      elem.addEventListener('dragend', handleDragEnd, false);
+    }
+
+    // タスクの順序変更をサーバーに送信
+    function updateOrder() {
+      let tasks = document.querySelectorAll('.task');
+      let order = [];
+      tasks.forEach(function(task) {
+        order.push(parseInt(task.getAttribute('data-id')));
+      });
+      fetch('/reorder_tasks', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({order: order})
+      });
+    }
+
+    // 既存のタスクにドラッグ＆ドロップハンドラを追加
+    document.querySelectorAll('.task').forEach(function(task) {
+      addDnDHandlers(task);
+    });
+
+    // タスク追加フォームの送信処理
+    document.getElementById('task-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      let title = document.getElementById('title').value;
+      let details = document.getElementById('details').value;
+      let due_date = document.getElementById('due_date').value;
+      let labels = document.getElementById('labels').value.split(',').map(s => s.trim()).filter(s => s);
+      
+      fetch('/add_task', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({title, details, due_date, labels})
+      })
+      .then(response => response.json())
+      .then(task => {
+        let li = document.createElement('li');
+        li.className = 'task';
+        li.setAttribute('draggable', 'true');
+        li.setAttribute('data-id', task.id);
+        li.innerHTML = `<strong>${task.title}</strong><br>
+                        詳細: ${task.details}<br>
+                        期限: ${task.due_date}<br>
+                        ラベル: ${task.labels.join(', ')}<br>
+                        状態: 未完了<br>
+                        <button onclick="completeTask(${task.id})">完了にする</button>`;
+        document.getElementById('task-list').appendChild(li);
+        addDnDHandlers(li);
+        // フォームのリセット
+        document.getElementById('task-form').reset();
+      });
+    });
+
+    // タスクを完了にする処理
+    function completeTask(id) {
+      fetch('/complete_task', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id: id})
+      })
+      .then(response => response.json())
+      .then(result => {
+        if(result.result === "success") {
+          let taskElem = document.querySelector(`.task[data-id="${id}"]`);
+          taskElem.classList.add('completed');
+          taskElem.querySelector('button').disabled = true;
+        }
+      });
+    }
+  </script>
+</body>
+</html>
