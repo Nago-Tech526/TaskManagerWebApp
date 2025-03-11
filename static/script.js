@@ -28,18 +28,28 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   
-    // 新規タスクをリストへ追加
+    // 新規タスクをリストへ追加（詳細は非表示、クリックでトグル表示）
     function addTaskToList(task) {
       const li = document.createElement('li');
       li.className = 'task';
       li.setAttribute('draggable', 'true');
       li.setAttribute('data-id', task.id);
-      li.innerHTML = `<strong>${task.title}</strong><br>
-                      詳細: ${task.details}<br>
-                      期限: ${task.due_date}<br>
-                      ラベル: ${task.labels.join(', ')}<br>
-                      状態: 未完了<br>
-                      <button onclick="completeTask(${task.id})">完了にする</button>`;
+      li.innerHTML = `
+        <div class="task-summary">
+          <span class="task-title">${task.title}</span>
+          <span class="task-due">${task.due_date}</span>
+          <span class="task-label">${task.labels.join(', ')}</span>
+          <button onclick="completeTask(${task.id}); event.stopPropagation();">完了</button>
+        </div>
+        <div class="task-details" style="display: none;">
+          詳細: ${task.details}
+        </div>
+      `;
+      // タスククリックで詳細表示のトグル
+      li.addEventListener('click', () => {
+        const detailsDiv = li.querySelector('.task-details');
+        detailsDiv.style.display = detailsDiv.style.display === 'none' ? 'block' : 'none';
+      });
       taskList.appendChild(li);
       addDnDHandlers(li);
     }
@@ -95,11 +105,16 @@ document.addEventListener("DOMContentLoaded", () => {
       elem.addEventListener('dragend', handleDragEnd, false);
     }
   
-    document.querySelectorAll('.task').forEach(function(task) {
+    // 既存タスクにドラッグ＆ドロップおよびクリック（詳細トグル）のイベントを付与
+    document.querySelectorAll('.task').forEach(task => {
       addDnDHandlers(task);
+      task.addEventListener('click', () => {
+        const detailsDiv = task.querySelector('.task-details');
+        detailsDiv.style.display = detailsDiv.style.display === 'none' ? 'block' : 'none';
+      });
     });
   
-    // タスクの順序変更をサーバーに送信
+    // タスクの新しい順序をサーバーに送信
     function updateOrder() {
       const tasks = document.querySelectorAll('.task');
       const order = Array.from(tasks).map(task => parseInt(task.getAttribute('data-id')));
@@ -111,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
   
-  // タスクを完了にする処理（グローバル関数として定義）
+  // グローバル関数：タスク完了処理
   function completeTask(id) {
     fetch('/complete_task', {
       method: 'POST',
@@ -127,5 +142,4 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.disabled = true;
       }
     });
-  }
-  
+  }  

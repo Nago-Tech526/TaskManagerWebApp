@@ -8,38 +8,40 @@ body {
   background-color: #f5f5f5;
   color: #444;
   font-family: 'Poppins', sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   margin: 0;
+  padding: 0;
+}
+
+/* メインコンテナ：左右に分割 */
+.main-container {
+  display: flex;
   min-height: 100vh;
 }
 
-h1 {
-  color: rgb(179, 131, 226);
-  font-size: 4rem;
-  text-align: center;
-  opacity: 0.8;
-  margin-top: 2rem;
+/* 左ペイン：タスク追加画面 */
+.left-pane {
+  width: 30%;
+  padding: 2rem;
+  background-color: #fff;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
-form {
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  width: 400px;
-  background-color: #fff;
-  padding: 2rem;
-  margin-bottom: 2rem;
+.left-pane h1 {
+  color: rgb(179, 131, 226);
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.left-pane form {
   display: flex;
   flex-direction: column;
 }
 
 .input {
-  border: none;
-  color: #444;
-  font-size: 1.5rem;
-  padding: 1rem 2rem;
-  width: 100%;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  padding: 0.8rem;
   margin-bottom: 1rem;
 }
 
@@ -51,33 +53,64 @@ form {
   outline-color: rgb(179, 131, 226);
 }
 
+/* 右ペイン：タスクリスト */
+.right-pane {
+  width: 70%;
+  padding: 2rem;
+  background-color: #f9f9f9;
+}
+
 .todos {
-  background-color: #fff;
+  list-style-type: none;
   padding: 0;
   margin: 0;
-  width: 400px;
-  list-style-type: none;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.todos li {
-  border-top: 1px solid #e5e5e5;
-  cursor: move;
-  font-size: 1.5rem;
-  padding: 1rem 2rem;
+/* タスク表示：横長の長方形 */
+.todos li.task {
+  background-color: #fff;
+  border: 1px solid #e5e5e5;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
 }
 
-.todos li:first-child {
-  border-top: none;
+/* タスクの概要部分（タイトル・期限・ラベル・完了ボタン）を横並びに */
+.task-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.todos li.completed {
+.task-summary span {
+  flex: 1;
+  padding: 0 0.5rem;
+}
+
+.task-summary button {
+  margin-left: 1rem;
+}
+
+/* 完了済みタスクのスタイル */
+.todos li.completed .task-summary {
   color: #b6b6b6;
   text-decoration: line-through;
 }
 
+/* タスク詳細は初期状態で非表示 */
+.task-details {
+  margin-top: 0.5rem;
+  border-top: 1px solid #e5e5e5;
+  padding-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
 small {
-  color: #b5b5b5;
+  display: block;
   margin-top: 2rem;
   text-align: center;
+  color: #b5b5b5;
 }
