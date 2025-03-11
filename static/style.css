@@ -83,6 +83,89 @@ body {
   flex-direction: column;
   cursor: pointer;
 }
+/*====================================================================
+   .task-labels（参考CSSベースのラベルデザイン）
+====================================================================*/
+.task-labels ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+}
+
+.task-labels ul li {
+  position: relative;
+  margin: 0 0.3em 0.3em 0;
+}
+
+.task-labels ul li a {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 34px;
+  padding: 0 1em;
+  background-color: #fff;
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  color: #333;
+  font-size: 12px;
+  text-decoration: none;
+  transition: .2s;
+  box-sizing: border-box;
+}
+
+.task-labels ul li a:before {
+  content: "#";
+  padding-right: 2px;
+}
+
+.task-labels ul li span {
+  position: absolute;
+  top: 0;
+  right: -10px;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 28px;
+  height: 28px;
+  background-color: #2196F3;
+  border: 1px solid #2196F3;
+  border-radius: 100%;
+  color: #fff;
+  font-size: 11px;
+  opacity: 0;
+  transition: .2s;
+  transform: scale(.4);
+}
+
+.task-labels ul li span::after {
+  position: absolute;
+  top: 50%;
+  left: -8px;
+  content: '';
+  width: 0;
+  height: 0;
+  margin-top: -7px;
+  border-color: transparent #2196F3 transparent transparent;
+  border-style: solid;
+  border-width: 7px 14px 7px 0;
+}
+
+.task-labels ul li a:hover {
+  border: 1px solid #2196F3;
+  color: #2196F3;
+}
+
+.task-labels ul li:hover span {
+  right: -26px;
+  opacity: 1;
+  transform: scale(1);
+}
 
 /* タスク概要：左側にチェックボックス、右側に各情報を横並びで */
 .task-summary {

@@ -29,12 +29,18 @@
             <input type="checkbox" class="task-checkbox" onclick="toggleComplete(event, {{ task.id }})" {% if task.completed %}checked{% endif %}>
             <span class="task-title">{{ task.title }}</span>
             <span class="task-due">{{ task.due_date }}</span>
-            <span class="task-label">{{ task.labels|join(', ') }}</span>
+            <div class="task-labels">
+              <ul>
+                {% for label in task.labels %}
+                  <li><a href="#">{{ label }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
           </div>
           <div class="task-details" style="display: none;">
             詳細: {{ task.details }}
           </div>
-        </li>
+        </li>        
         {% endfor %}
       </ul>
       <small>タスクをドラッグして順序変更。タスクをクリックで詳細表示。</small>
