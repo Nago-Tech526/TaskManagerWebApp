@@ -9,7 +9,7 @@
 </head>
 <body>
   <div class="main-container">
-    <!-- 左側：タスク追加画面 -->
+    <!-- 左側：固定されたタスク追加画面 -->
     <div class="left-pane">
       <h1>タスク管理</h1>
       <form id="task-form">
@@ -20,16 +20,16 @@
         <button type="submit">タスクを追加</button>
       </form>
     </div>
-    <!-- 右側：タスクリスト -->
+    <!-- 右側：スクロール可能なタスクリスト -->
     <div class="right-pane">
       <ul class="todos" id="task-list">
         {% for task in tasks %}
         <li class="task {% if task.completed %}completed{% endif %}" draggable="true" data-id="{{ task.id }}">
           <div class="task-summary">
+            <input type="checkbox" class="task-checkbox" onclick="toggleComplete(event, {{ task.id }})" {% if task.completed %}checked{% endif %}>
             <span class="task-title">{{ task.title }}</span>
             <span class="task-due">{{ task.due_date }}</span>
             <span class="task-label">{{ task.labels|join(', ') }}</span>
-            <button onclick="completeTask({{ task.id }}); event.stopPropagation();">完了</button>
           </div>
           <div class="task-details" style="display: none;">
             詳細: {{ task.details }}

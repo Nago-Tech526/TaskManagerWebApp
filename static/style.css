@@ -12,18 +12,22 @@ body {
   padding: 0;
 }
 
-/* メインコンテナ：左右に分割 */
+/* メインコンテナ */
 .main-container {
   display: flex;
-  min-height: 100vh;
 }
 
-/* 左ペイン：タスク追加画面 */
+/* 左ペイン：固定表示 */
 .left-pane {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
   width: 30%;
   padding: 2rem;
   background-color: #fff;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
 }
 
 .left-pane h1 {
@@ -53,11 +57,14 @@ body {
   outline-color: rgb(179, 131, 226);
 }
 
-/* 右ペイン：タスクリスト */
+/* 右ペイン：スクロール可能 */
 .right-pane {
+  margin-left: 30%;
   width: 70%;
   padding: 2rem;
   background-color: #f9f9f9;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .todos {
@@ -77,11 +84,14 @@ body {
   cursor: pointer;
 }
 
-/* タスクの概要部分（タイトル・期限・ラベル・完了ボタン）を横並びに */
+/* タスク概要：左側にチェックボックス、右側に各情報を横並びで */
 .task-summary {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+}
+
+.task-checkbox {
+  margin-right: 1rem;
 }
 
 .task-summary span {
@@ -89,17 +99,13 @@ body {
   padding: 0 0.5rem;
 }
 
-.task-summary button {
-  margin-left: 1rem;
-}
-
-/* 完了済みタスクのスタイル */
+/* 完了済みタスク */
 .todos li.completed .task-summary {
   color: #b6b6b6;
   text-decoration: line-through;
 }
 
-/* タスク詳細は初期状態で非表示 */
+/* タスク詳細（初期非表示） */
 .task-details {
   margin-top: 0.5rem;
   border-top: 1px solid #e5e5e5;
