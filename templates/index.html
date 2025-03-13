@@ -3,14 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- 静的ファイルはFlaskのstaticディレクトリに配置 -->
+  <!-- フォントの読み込み -->
+  <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <title>タスク管理アプリ</title>
 </head>
 <body>
   <div class="main-container">
-    <!-- 左側：固定されたタスク追加画面 -->
-    <div class="left-pane">
+    <!-- 左側：固定されたタスク追加・編集フォーム -->
+    <div class="left-pane wf-notosansjapanese">
       <h1>タスク管理</h1>
       <form id="task-form">
         <input type="text" class="input" id="title" placeholder="タスクタイトル" required>
@@ -21,11 +23,13 @@
       </form>
     </div>
     <!-- 右側：スクロール可能なタスクリスト -->
-    <div class="right-pane">
+    <div class="right-pane wf-notosansjapanese">
       <ul class="todos" id="task-list">
         {% for task in tasks %}
-        <li class="task {% if task.completed %}completed{% endif %}" draggable="true" data-id="{{ task.id }}">
-          <div class="task-summary">
+        <li class="task {% if task.completed %}completed{% endif %}" draggable="true" data-id="{{ task.id }}"
+            data-title="{{ task.title }}" data-details="{{ task.details }}" data-due_date="{{ task.due_date }}"
+            data-labels="{{ task.labels|tojson }}">
+          <div class="task-summary" data-id="{{ task.id }}" data-title="{{ task.title }}" data-details="{{ task.details }}" data-due_date="{{ task.due_date }}" data-labels='{{ task.labels | tojson }}'>
             <input type="checkbox" class="task-checkbox" onclick="toggleComplete(event, {{ task.id }})" {% if task.completed %}checked{% endif %}>
             <span class="task-title">{{ task.title }}</span>
             <span class="task-due">{{ task.due_date }}</span>
@@ -36,11 +40,12 @@
                 {% endfor %}
               </ul>
             </div>
+            <button class="edit-button" onclick="startEditTask(event, {{ task.id }})">✏️</button>
           </div>
           <div class="task-details" style="display: none;">
             詳細: {{ task.details }}
           </div>
-        </li>        
+        </li>
         {% endfor %}
       </ul>
       <small>タスクをドラッグして順序変更。タスクをクリックで詳細表示。</small>

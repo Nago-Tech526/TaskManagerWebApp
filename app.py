@@ -35,6 +35,19 @@ def toggle_task():
             return jsonify({"result": "success", "completed": task["completed"]})
     return jsonify({"result": "not found"}), 404
 
+@app.route("/edit_task", methods=["POST"])
+def edit_task():
+    data = request.get_json()
+    task_id = data.get("id")
+    for task in tasks:
+        if task["id"] == task_id:
+            task["title"] = data.get("title", task["title"])
+            task["details"] = data.get("details", task["details"])
+            task["due_date"] = data.get("due_date", task["due_date"])
+            task["labels"] = data.get("labels", task["labels"])
+            return jsonify(task)
+    return jsonify({"result": "not found"}), 404
+
 @app.route("/reorder_tasks", methods=["POST"])
 def reorder_tasks():
     data = request.get_json()
