@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (window.editingTaskId) {
       // 編集モードの処理
-      console.log('Editing task:', window.editingTaskId); // デバッグ用のログ
+      console.log('Editing task:', window.editingTaskId); // デバッグ用ログ
       fetch('/edit_task', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .then(response => response.json())
       .then(task => {
-         console.log('Task updated:', task); // デバッグ用のログ
+         console.log('Task updated:', task); // デバッグ用ログ
          // 該当タスク要素を更新
          let taskElem = document.querySelector(`.task[data-id="${task.id}"]`);
          if (taskElem) {
@@ -112,6 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
     dragSrcEl = this;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', this.outerHTML);
+    e.dataTransfer.setData('text/plain', this.outerHTML);    
     this.classList.add('dragElem');
   }
   function handleDragOver(e) {
@@ -165,6 +166,77 @@ document.addEventListener("DOMContentLoaded", () => {
       body: JSON.stringify({order: order})
     });
   }
+
+  // --- Plan機能 ---
+  const planButton = document.getElementById('plan-button');
+  const planArea = document.getElementById('plan-area');
+  const planDropzone = document.getElementById('plan-dropzone');
+  const finishPlanButton = document.getElementById('finish-plan-button');
+
+  planButton.addEventListener('click', () => {
+      // Planモード開始：Planエリアを表示
+      planArea.style.display = 'block';
+      window.planMode = true;
+  });
+
+  // ドラッグ＆ドロップ：Planエリア用
+  planDropzone.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      planDropzone.classList.add('over');
+  });
+  planDropzone.addEventListener('dragleave', function(e) {
+      planDropzone.classList.remove('over');
+  });
+  planDropzone.addEventListener('drop', function(e) {
+    try {
+      e.preventDefault();
+      planDropzone.classList.remove('over');
+  
+      // "text/html" と "text/plain" の両方を試す
+      const droppedHTML = e.dataTransfer.getData('text/html') || e.dataTransfer.getData('text/plain');
+      if (!droppedHTML) {
+        console.error("Dropped data is empty.");
+        return;
+      }
+      
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = droppedHTML.trim();
+      
+      // すべての子要素から .task クラスを持つ要素を探す
+      let droppedElem = Array.from(tempDiv.children).find(child => child.classList && child.classList.contains('task'));
+      
+      if (!droppedElem) {
+        console.error("No valid task element found in dropped data. Full data:", tempDiv.innerHTML);
+        return;
+      }
+      
+      if (droppedElem && droppedElem.classList.contains('task')) {
+        // すでにバックログに存在する場合は削除
+        const originalElem = document.querySelector(`.task[data-id="${droppedElem.getAttribute('data-id')}"]`);
+        if (originalElem) {
+          originalElem.parentNode.removeChild(originalElem);
+        }
+        // Planエリアに追加
+        planDropzone.appendChild(droppedElem);
+        addDnDHandlers(droppedElem);
+      } else {
+        console.error("Dropped element is not a valid task element. Dropped element:", droppedElem);
+      }
+    } catch (err) {
+      console.error("Error during drop event handling:", err);
+    }
+  });  
+
+  finishPlanButton.addEventListener('click', () => {
+      // Plan完了：Planエリアを非表示にしてモード終了
+      planArea.style.display = 'none';
+      window.planMode = false;
+      // 任意：Planエリア内のタスクに「planned」クラスを追加するなどの視覚的変更
+      const plannedTasks = planDropzone.querySelectorAll('.task');
+      plannedTasks.forEach(task => {
+          task.classList.add('planned');
+      });
+  });
 });
 
 // チェックボックスで完了状態をトグル

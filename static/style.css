@@ -1,6 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&display=swap');
 
+.wf-notosansjapanese {
+  font-family: "Noto Sans JP", sans-serif;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -204,4 +208,37 @@ small {
   margin-top: 2rem;
   text-align: center;
   color: #b5b5b5;
+}
+
+/*====================================================================
+   Planエリア（今日やるタスク選択用）
+====================================================================*/
+#plan-area {
+  border: 2px dashed #2196F3;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: #e3f2fd;
+}
+#plan-area h2 {
+  margin-top: 0;
+}
+.plan-dropzone {
+  min-height: 100px;
+  background-color: #f0f8ff;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.plan-dropzone.over {
+  background-color: #cce4f7;
+}
+#finish-plan-button {
+  background-color: #2196F3;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-radius: 4px;
 }
