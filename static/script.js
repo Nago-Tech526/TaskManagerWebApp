@@ -227,15 +227,68 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });  
 
+  // 修正例：Plan完了時のタスクデータ収集部分
   finishPlanButton.addEventListener('click', () => {
-      // Plan完了：Planエリアを非表示にしてモード終了
-      planArea.style.display = 'none';
-      window.planMode = false;
-      // 任意：Planエリア内のタスクに「planned」クラスを追加するなどの視覚的変更
-      const plannedTasks = planDropzone.querySelectorAll('.task');
-      plannedTasks.forEach(task => {
-          task.classList.add('planned');
-      });
+    // Plan完了：Planエリアを非表示にしてモード終了
+    planArea.style.display = 'none';
+    window.planMode = false;
+    const plannedTasks = planDropzone.querySelectorAll('.task');
+    plannedTasks.forEach(task => {
+        task.classList.add('planned');
+    });
+
+    // APIへ送信するタスクデータを構築
+    const tasksToSend = [];
+    plannedTasks.forEach(task => {
+        const name = task.dataset.title;
+        const details = task.dataset.details;
+        const deadline = task.dataset.due_date;
+        let labels = [];
+        const labelsStr = task.dataset.labels;
+        if (labelsStr && labelsStr.trim() !== "") {
+          const trimmed = labelsStr.trim();
+          if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+            try {
+              labels = JSON.parse(trimmed);
+            } catch (err) {
+              console.error('Error parsing labels for task id:', task.dataset.id, err);
+              labels = [];
+            }
+          } else {
+            console.warn('Labels data for task id:', task.dataset.id, 'is not valid JSON:', labelsStr);
+            labels = [];
+          }
+        }
+        tasksToSend.push({
+            name: name,
+            details: details,
+            deadline: deadline,
+            labels: labels,
+            listType: "todo"
+        });
+    });
+    const payload = { tasks: tasksToSend };
+
+    // APIリクエスト（CORS対策：APIサーバー側に適切なヘッダーが必要）
+    fetch('http://localhost:3000/addTasks', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Successfully transferred planned tasks:', data);
+    })
+    .catch(error => {
+        console.error('Error transferring planned tasks:', error);
+    });
   });
 });
 
